@@ -143,6 +143,7 @@ class GPT2Bot(commands.Cog):
         if (nsamples > 10):
             await ctx.send('Please set at most 10 samples.')
             await ctx.trigger_typing()
+            return
         self.shutdown()
         try:
             self.set_state(int(nsamples), int(length), float(temp), int(top_k), model_name)
