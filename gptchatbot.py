@@ -25,11 +25,11 @@ class GPT2Bot(commands.Cog):
         self.is_inferencing = False
     
     def init_state(self):
-        self.model_name='117M'
+        self.model_name='345M'
         self.batch_size = 1
-        self.seed = 42069
+        self.seed = 666666
         self.nsamples=1
-        self.length=10
+        self.length=150
         self.temperature=1
         self.top_k=0
     
@@ -140,17 +140,30 @@ class GPT2Bot(commands.Cog):
             return
 
         await ctx.trigger_typing()
+        if (nsamples > 10):
+            await ctx.send('Please set at most 10 samples.')
+            await ctx.trigger_typing()
         self.shutdown()
-        self.set_state(int(nsamples), int(length), float(temp), int(top_k), model_name)
-        await ctx.trigger_typing()
-        self.preinit_model()
-        self.session = tf.InteractiveSession(graph=tf.Graph())
-        await ctx.trigger_typing()
-        self.init_model()
+        try:
+            self.set_state(int(nsamples), int(length), float(temp), int(top_k), model_name)
+            await ctx.trigger_typing()
+            self.preinit_model()
+            self.session = tf.InteractiveSession(graph=tf.Graph())
+            await ctx.trigger_typing()
+            self.init_model()
+        except:
+            await ctx.send('Invalid parameters, resetting to default configuration.')
+            self.shutdown()
+            self.init_state()
+            await ctx.trigger_typing()
+            self.preinit_model()
+            self.session = tf.InteractiveSession(graph=tf.Graph())
+            await ctx.trigger_typing()
+            self.init_model()
 
         await ctx.send('Succesfully Set Configuration!')
-        if (self.nsamples * self.length > 100):
-            await ctx.send('The configuration parameters are process intensive, responses may take a while.')
+        # if (self.nsamples * self.length > 100):
+            # await ctx.send('The configuration parameters are process intensive, responses may take a while.')
 
     @commands.command()
     @commands.guild_only()

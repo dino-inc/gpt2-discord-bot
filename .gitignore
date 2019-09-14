@@ -1,7 +1,11 @@
 # Config
+config/*
 *.secret
 auth.json
 db.json
+
+#my powershell script to run it in console
+run.ps1
 
 
 # Model
