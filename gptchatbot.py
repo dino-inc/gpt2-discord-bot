@@ -94,11 +94,18 @@ class GPT2Bot(commands.Cog):
                 out = await self.bot.loop.run_in_executor(None, text_generator)
 
                 response = self.enc.decode(out[0])
-                truncated_response = response[:response.find('<|endoftext|>')]
+                if (response.find('<|endoftext">')!=-1):
+                    truncated_response = response[:response.find('<|endoftext|>')]
+                else:
+                    # literally just sets truncated response to the response that isn't truncated
+                    # terrible solution but it works:tm:
+                    truncated_response = response
+                # only prints the shortened response if it is different from the response for brevity
                 if (len(truncated_response) != len(response)):
-                    logging.info('RESPONSE TRUNCATED:' + response[response.find('<|endoftext|>'):])
+                    logging.debug('RESPONSE TRUNCATED:' + response[response.find('<|endoftext|>'):])
                 logging.info('RESPONSE GENERATED IN :' + str(round(time.time() - start, 2)) + ' seconds.')
-                logging.info('RESPONSE: ' + response)
+                logging.info('RESPONSE: ' + truncated_response)
+                logging.debug('ORIGINAL RESPONSE: ' + response)
                 logging.info('RESPONSE LEN: ' + str(len(truncated_response)))
                 
                 response_chunk = 0
