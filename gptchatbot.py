@@ -117,7 +117,7 @@ class GPT2Bot(commands.Cog):
                 else:
                     await ctx.send(truncated_response)
                 if (len(truncated_response) != len(response)):
-                    await ctx.send("Truncated "+len(response[response.find('<|endoftext|>'):])+" characters after"
+                    await ctx.send("Truncated "+str(len(response[response.find('<|endoftext|>'):]))+" characters after"
                                                                                                " reaching endoftext.")
 
         self.is_inferencing = False
