@@ -94,7 +94,7 @@ class GPT2Bot(commands.Cog):
                 out = await self.bot.loop.run_in_executor(None, text_generator)
 
                 response = self.enc.decode(out[0])
-                if (response.find('<|endoftext">')!=-1):
+                if (response.find('<|endoftext|>')!=-1):
                     truncated_response = response[:response.find('<|endoftext|>')]
                 else:
                     # literally just sets truncated response to the response that isn't truncated
@@ -102,7 +102,7 @@ class GPT2Bot(commands.Cog):
                     truncated_response = response
                 # only prints the shortened response if it is different from the response for brevity
                 if (len(truncated_response) != len(response)):
-                    logging.debug('RESPONSE TRUNCATED:' + response[response.find('<|endoftext|>'):])
+                    logging.info('RESPONSE TRUNCATED:' + response[response.find('<|endoftext|>'):])
                 logging.info('RESPONSE GENERATED IN :' + str(round(time.time() - start, 2)) + ' seconds.')
                 logging.info('RESPONSE: ' + truncated_response)
                 logging.debug('ORIGINAL RESPONSE: ' + response)
@@ -128,11 +128,11 @@ class GPT2Bot(commands.Cog):
     @commands.guild_only()
     async def getconfig(self, ctx):
         logging.info('Current state.')
-        await ctx.send('N Samples: ' + str(self.nsamples))
-        await ctx.send('Max Length: ' + str(self.length))
-        await ctx.send('Temperature: ' + str(self.temperature))
-        await ctx.send('Top K: ' + str(self.top_k))
-        await ctx.send('Model: ' + str(self.model_name))
+        await ctx.send('N Samples: ' + str(self.nsamples)+
+                       '\nMax Length: ' + str(self.length)+
+                       '\nTemperature: ' + str(self.temperature)+
+                       '\nTop K: ' + str(self.top_k)+
+                       '\nModel: ' + str(self.model_name))
 
     @commands.command()
     @commands.guild_only()
