@@ -206,7 +206,12 @@ class GPT2Bot(commands.Cog):
         self.init_model()
 
         await ctx.send('Succesfully Set Default Configuration!')
-    
+
+    @commands.command()
+    @commands.is_owner()
+    @commands.guild_only()
+    async def reset_talking(self, ctx):
+        self.is_inferencing = False
         
 def setup(bot):
     bot.add_cog(GPT2Bot(bot))
