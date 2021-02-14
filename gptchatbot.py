@@ -79,19 +79,25 @@ class GPT2Bot(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    async def talk(self, ctx, *, message):
+    async def talk(self, ctx, message = None):
+        if message is None:
+            message = "Generating empty message."
         logging.info('MSG: ' + message)
         if (self.is_inferencing):
             await ctx.send('Currently talking to someone. Try again later.')
             return
-        
+
         self.is_inferencing = True
         context_tokens = self.enc.encode(message)
         for _ in range(self.nsamples):
             async with ctx.typing():
                 start = time.time()
-                text_generator = functools.partial(self.generate_text, context_tokens)
-                out = await self.bot.loop.run_in_executor(None, text_generator)
+                if message is not None:
+                    text_generator = functools.partial(self.generate_text, context_tokens)
+                    out = await self.bot.loop.run_in_executor(None, text_generator)
+                else:
+                    text_generator = functools.partial(self.generate_text_no_args)
+                    out = await self.bot.loop.run_in_executor(None, text_generator)
 
                 response = self.enc.decode(out[0])
                 if (response.find('<|endoftext|>')!=-1):
@@ -107,7 +113,7 @@ class GPT2Bot(commands.Cog):
                 logging.info('RESPONSE: ' + truncated_response)
                 logging.debug('ORIGINAL RESPONSE: ' + response)
                 logging.info('RESPONSE LEN: ' + str(len(truncated_response)))
-                
+
                 response_chunk = 0
                 chunk_size = 1990
                 if (len(truncated_response) > 2000):
@@ -116,16 +122,19 @@ class GPT2Bot(commands.Cog):
                         response_chunk += chunk_size
                 else:
                     await ctx.send(truncated_response)
-                if (len(truncated_response) != len(response)):
-                    await ctx.send("Truncated "+str(len(response[response.find('<|endoftext|>'):]))+" characters after"
-                                                                                               " reaching endoftext.")
+                # if (len(truncated_response) != len(response)):
+                    # await ctx.send("Truncated "+str(len(response[response.find('<|endoftext|>'):]))+" characters after"
+                                                                                               # " reaching endoftext.")
 
         self.is_inferencing = False
-    
+
     def generate_text(self, context_tokens):
         return self.session.run(self.output, feed_dict={
                     self.context: [context_tokens for _ in range(1)]
                 })[:, len(context_tokens):]
+
+    def generate_text_no_args(self):
+        return self.session.run(self.output)
 
     @commands.command()
     @commands.guild_only()
